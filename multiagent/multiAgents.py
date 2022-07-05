@@ -153,7 +153,58 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        legalMoves = gameState.getLegalActions()
+
+        counter = -1
+        val = self.value(gameState, counter, 0)
+
+        return legalMoves[0]
+
+
+    def value(self, state, counter, agentIndex):
+        if counter == self.depth and agentIndex == state.getNumAgents() - 1 or state.isWin() or state.isLose():
+            return [self.evaluationFunction(state), None]
+
+        agentIndex = agentIndex % state.getNumAgents()
+        if agentIndex == 0:
+            counter += 1
+
+        if agentIndex == 0:
+            return self.max_value(state, counter, agentIndex)
+        else:
+            return self.min_value(state, counter, agentIndex)
+
+    def max_value(self, state, counter, agentIndex):
+
+        legalMoves = state.getLegalActions(agentIndex)
+
+        maxVal = -100000
+        bestMove = None
+        for move in legalMoves:
+            newState = state.generateSuccessor(agentIndex, move)
+            val = self.value(newState, counter, agentIndex + 1)
+            if val[0] >= maxVal:
+                maxVal = val[0]
+                bestMove = move
+        return [maxVal, bestMove]
+
+    def min_value(self, state, counter, agentIndex):
+
+        legalMoves = state.getLegalActions(agentIndex)
+
+        minVal = 1000000
+        bestMove = None
+
+        for move in legalMoves:
+            newState = state.generateSuccessor(agentIndex, move)
+            val = self.value(newState, counter, agentIndex + 1)
+            if val[0] <= minVal:
+                minVal = val[0]
+                bestMove = move
+
+        return [minVal, bestMove]
+
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
