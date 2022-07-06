@@ -80,7 +80,6 @@ class ReflexAgent(Agent):
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
         ghostPos = [ghostState.getPosition() for ghostState in newGhostStates]
-        print(str(ghostPos))
 
         dist_to_ghost = []
         for pos in ghostPos:
@@ -210,7 +209,58 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.value(gameState, -1, 0, -float("inf"), float("inf"))[1]
+
+    def value(self, state, counter, agentIndex, a, b):
+
+        agentIndex = agentIndex % state.getNumAgents()
+        if agentIndex == 0:
+            counter += 1
+
+        if counter >= self.depth or state.isWin() or state.isLose():
+            return [self.evaluationFunction(state)]
+
+        if agentIndex == 0:
+            return self.max_value(state, counter, agentIndex, a, b)
+        else:
+            return self.min_value(state, counter, agentIndex, a, b)
+
+    def max_value(self, state, counter, agentIndex, a, b):
+
+        legalMoves = state.getLegalActions(agentIndex)
+
+        maxVal = -float("inf")
+        bestMove = None
+        for move in legalMoves:
+            newState = state.generateSuccessor(agentIndex, move)
+            val = self.value(newState, counter, agentIndex + 1, a, b)
+            if val[0] >= maxVal:
+                bestMove = move
+                maxVal = val[0]
+            if maxVal > b:
+                return [maxVal]
+            a = max(a, maxVal)
+
+        return [maxVal, bestMove]
+
+    def min_value(self, state, counter, agentIndex, a, b):
+
+        legalMoves = state.getLegalActions(agentIndex)
+
+        minVal = float("inf")
+        bestMove = None
+
+        for move in legalMoves:
+            newState = state.generateSuccessor(agentIndex, move)
+            val = self.value(newState, counter, agentIndex + 1, a, b)
+            if val[0] <= minVal:
+                minVal = val[0]
+                bestMove = move
+            if minVal < a:
+                return [minVal]
+            b = min(b, minVal)
+
+        return [minVal, bestMove]
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
