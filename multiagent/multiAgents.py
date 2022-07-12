@@ -349,25 +349,33 @@ def betterEvaluationFunction(currentGameState):
         dist_to_ghost.append(1 / ((mazeDistance(pos, pac_pos, currentGameState) + 0.0001) ** 2))
 
     food_list = currentGameState.getFood().asList()
-    food_dist = []
+    food_man_dist = []
     for i in range(len(food_list)):
-        food_dist.append((mazeDistance(pac_pos, food_list[i], currentGameState)))
+        food_man_dist.append((manhattanDistance(pac_pos, food_list[i]), food_list[i]))
+
+    food_man_dist.sort(key=lambda y: y[0])
+    food_man_dist = food_man_dist[:2]
+
+    food_maze_dist = []
+    for food in food_man_dist:
+        food_maze_dist.append(mazeDistance(pac_pos, food[1], currentGameState))
 
     caps = currentGameState.getCapsules()
     capsval = 0
     if caps:
         caps_dist = []
         for c in caps:
-            caps_dist.append((mazeDistance(pac_pos, c, currentGameState)))
+            caps_dist.append(mazeDistance(pac_pos, c, currentGameState))
         capsval = sum(caps_dist) * 20
 
-    ghostval= sum(dist_to_ghost) * 10
+    ghostval = sum(dist_to_ghost) * 10
     foodval = 0
-    if food_dist:
-        foodval=min(food_dist)
-    scoreval=currentGameState.getScore()
-    val = -ghostval - foodval + scoreval - capsval
+    if food_maze_dist:
+        foodval = min(food_maze_dist)
+    scoreval = currentGameState.getScore()
+    val = scoreval - ghostval - foodval - capsval
     return val
+
 
 class PositionSearchProblem(search.SearchProblem):
     """
